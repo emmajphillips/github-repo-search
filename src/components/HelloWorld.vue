@@ -1,12 +1,24 @@
 <template>
   <v-container>
-    <v-row class="text-center">
-      <v-col class="mb-4">
-        <h1 class="display-2 font-weight-bold mb-3">
-          Search GitHub Repositories
-        </h1>
-      </v-col>
-    </v-row>
+    <v-layout>
+      <v-flex xs12 sm8 offset-sm2 lg6 offset-lg3>
+        <v-card color="green">
+          <h3 class="text-center">Hello</h3>
+          <v-card-text>
+            <v-form v-model="valid">
+              <v-text-field
+                v-model="query"
+                label="Search GitHub"
+                color="black"
+              />
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn right color="warning" round>Search</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-flex>
+    </v-layout>
   </v-container>
 </template>
 
@@ -16,6 +28,9 @@ import Vue from "vue";
 export default Vue.extend({
   name: "HelloWorld",
 
-  data: () => ({})
+  data: () => ({
+    valid: false,
+    query: ""
+  })
 });
 </script>
