@@ -58,7 +58,7 @@
           </v-card>
         </v-flex>
       </v-layout>
-      <v-pagination v-model="page"></v-pagination>
+      <v-btn v-on:click="handlePageIncrease"><span>></span></v-btn>
     </v-container>
   </v-container>
 </template>
@@ -90,7 +90,7 @@ export default Vue.extend({
         );
         this.repositories = response.data;
       } catch (err) {
-        console.log("Error:", err);
+        console.log(err);
       }
     },
     async fetchBranches(name: string) {
@@ -103,8 +103,14 @@ export default Vue.extend({
         this.repository.name = name;
         this.repository.branches = response.data;
       } catch (err) {
-        console.log("Error:", err);
+        console.log(err);
       }
+    },
+    handlePageIncrease() {
+      if (this.repositories.length === 0) return;
+      this.page++;
+      console.log(this.page);
+      this.fetchRepositories();
     }
   }
 });
