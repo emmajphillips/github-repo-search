@@ -15,13 +15,7 @@
     </v-container>
     <v-container grid-list-md>
       <v-layout row wrap justify-center>
-        <v-flex
-          v-for="repository in repositories"
-          :key="`${repository.id}`"
-          xs12
-          sm8
-          lg6
-        >
+        <v-flex v-for="repo in repositories" :key="`${repo.id}`" xs12 sm8 lg6>
           <!-- Make card into own component -->
           <v-card>
             <v-container fluid>
@@ -29,26 +23,37 @@
                 <v-flex xs3>
                   <v-avatar tile size="100">
                     <img
-                      :src="`${repository.owner.avatar_url}`"
-                      :alt="`${repository.name}`"
+                      :src="`${repo.owner.avatar_url}`"
+                      :alt="`${repo.name}`"
                     />
                   </v-avatar>
                 </v-flex>
                 <v-flex xs9>
                   <v-card-text>
-                    <a :href="`${repository.html_url}`" target="_blank">
-                      <h3>{{ repository.name }}</h3>
+                    <a :href="`${repo.html_url}`" target="_blank">
+                      <h3>{{ repo.name }}</h3>
                     </a>
-                    <p>{{ repository.created_at }}</p>
+                    <p>{{ repo.created_at }}</p>
                     <v-btn
                       small
                       color="primary"
-                      v-on:click="fetchBranches(repository.name)"
+                      v-on:click="fetchBranches(repo.name)"
                       >See branches</v-btn
                     >
                   </v-card-text>
                 </v-flex>
               </v-layout>
+              <template
+                v-if="repo.name === repository.name && showBranches"
+                transition="slide-y-transition"
+              >
+                <p
+                  v-for="branch in repository.branches"
+                  :key="`${branch.name}`"
+                >
+                  {{ branch.name }}
+                </p>
+              </template>
             </v-container>
           </v-card>
         </v-flex>
@@ -61,17 +66,19 @@
 <script lang="ts">
 import Vue from "vue";
 import axios from "axios";
-
 export default Vue.extend({
   name: "HelloWorld",
-
   data: () => ({
     valid: false,
     baseUrl: "https://api.github.com",
     query: "",
     page: 1,
     repositories: [],
-    branches: []
+    repository: {
+      name: "",
+      branches: []
+    },
+    showBranches: false
   }),
   methods: {
     async fetchRepositories() {
@@ -87,13 +94,14 @@ export default Vue.extend({
       }
     },
     async fetchBranches(name: string) {
+      this.showBranches = !this.showBranches;
       try {
         const response = await axios.get(
           `${this.baseUrl}/repos/${this.query}/${name}/branches`,
           { headers: { Accept: "application/vnd.github.v3+json" } }
         );
-        this.branches = response.data;
-        console.log(this.branches);
+        this.repository.name = name;
+        this.repository.branches = response.data;
       } catch (err) {
         console.log("Error:", err);
       }
