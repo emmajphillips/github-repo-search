@@ -6,10 +6,8 @@
           <h1 class="display-3 text-center">Hello</h1>
           <v-form v-model="valid" v-on:submit.prevent="fetchRepositories">
             <v-text-field v-model="query" label="Search GitHub" color="black" />
+            <v-btn block color="warning" rounded type="submit">Search</v-btn>
           </v-form>
-          <v-btn block color="warning" rounded v-on:click="fetchRepositories"
-            >Search</v-btn
-          >
         </v-flex>
       </v-layout>
     </v-container>
@@ -43,7 +41,7 @@
                   </v-card-text>
                 </v-flex>
               </v-layout>
-              <template
+              <div
                 v-if="repo.name === repository.name && showBranches"
                 transition="slide-y-transition"
               >
@@ -53,29 +51,31 @@
                 >
                   {{ branch.name }}
                 </p>
-              </template>
+              </div>
             </v-container>
           </v-card>
         </v-flex>
       </v-layout>
-      <v-btn v-on:click="handlePageIncrease"><span>></span></v-btn>
+      <v-btn v-if="repositories.length > 24" v-on:click="handlePageIncrease"
+        ><span>></span></v-btn
+      >
     </v-container>
   </v-container>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import axios from "axios";
+import Vue from 'vue'
+import axios from 'axios'
 export default Vue.extend({
-  name: "HelloWorld",
+  name: 'HelloWorld',
   data: () => ({
     valid: false,
-    baseUrl: "https://api.github.com",
-    query: "",
+    baseUrl: 'https://api.github.com',
+    query: '',
     page: 1,
     repositories: [],
     repository: {
-      name: "",
+      name: '',
       branches: []
     },
     showBranches: false
@@ -83,35 +83,34 @@ export default Vue.extend({
   methods: {
     async fetchRepositories() {
       try {
-        if (!this.query) return;
+        if (!this.query) return
         const response = await axios.get(
           `${this.baseUrl}/users/${this.query}/repos?type=owner&per_page=25&page=${this.page}`,
-          { headers: { Accept: "application/vnd.github.v3+json" } }
-        );
-        this.repositories = response.data;
+          { headers: { Accept: 'application/vnd.github.v3+json' } }
+        )
+        this.repositories = response.data
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
     },
     async fetchBranches(name: string) {
-      this.showBranches = !this.showBranches;
+      this.showBranches = !this.showBranches
       try {
         const response = await axios.get(
           `${this.baseUrl}/repos/${this.query}/${name}/branches`,
-          { headers: { Accept: "application/vnd.github.v3+json" } }
-        );
-        this.repository.name = name;
-        this.repository.branches = response.data;
+          { headers: { Accept: 'application/vnd.github.v3+json' } }
+        )
+        this.repository.name = name
+        this.repository.branches = response.data
       } catch (err) {
-        console.log(err);
+        console.log(err)
       }
     },
     handlePageIncrease() {
-      if (this.repositories.length === 0) return;
-      this.page++;
-      console.log(this.page);
-      this.fetchRepositories();
+      if (this.repositories.length === 0) return
+      this.page++
+      this.fetchRepositories()
     }
   }
-});
+})
 </script>
