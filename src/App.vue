@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar app color="primary" dark> </v-app-bar>
+    <v-app-bar app color="primary" dark>Whoo!</v-app-bar>
 
     <v-main>
       <HelloWorld />
@@ -9,11 +9,11 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import HelloWorld from "./components/HelloWorld.vue";
+import Vue from 'vue'
+import HelloWorld from './components/HelloWorld.vue'
 
 export default Vue.extend({
-  name: "App",
+  name: 'App',
 
   components: {
     HelloWorld
@@ -22,5 +22,5 @@ export default Vue.extend({
   data: () => ({
     //
   })
-});
+})
 </script>

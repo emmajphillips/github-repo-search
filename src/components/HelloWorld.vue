@@ -1,10 +1,14 @@
 <template>
   <v-container>
-    <v-container>
+    <v-alert v-model="error" type="warning" dismissible>
+      No results found. Please try again
+    </v-alert>
+    <v-container mt-5>
       <v-layout>
         <v-flex xs12 sm8 offset-sm2 lg6 offset-lg3>
-          <h1 class="display-3 text-center">Hello</h1>
-          <v-form v-model="valid" v-on:submit.prevent="fetchRepositories">
+          <h1 class="display-2 mb-5 mt-5 text-center">Search GitHub</h1>
+          <v-spacer></v-spacer>
+          <v-form v-model="valid" v-on:submit.prevent="fetchRepositories" mt-5>
             <v-text-field v-model="query" label="Search GitHub" color="black" />
             <v-btn block color="warning" rounded type="submit">Search</v-btn>
           </v-form>
@@ -18,7 +22,7 @@
           <v-card>
             <v-container fluid>
               <v-layout row>
-                <v-flex xs3>
+                <v-flex xs4 sm3>
                   <v-avatar tile size="100">
                     <img
                       :src="`${repo.owner.avatar_url}`"
@@ -26,39 +30,63 @@
                     />
                   </v-avatar>
                 </v-flex>
-                <v-flex xs9>
+                <v-flex xs8 sm9>
                   <v-card-text>
-                    <a :href="`${repo.html_url}`" target="_blank">
-                      <h3>{{ repo.name }}</h3>
-                    </a>
-                    <p>{{ repo.created_at }}</p>
+                    <h3>
+                      <a :href="`${repo.html_url}`" target="_blank" mb-3>
+                        {{ repo.name }}
+                      </a>
+                    </h3>
+                    <p>Created: {{ displayDate(repo.created_at) }}</p>
                     <v-btn
                       small
+                      outlined
                       color="primary"
                       v-on:click="fetchBranches(repo.name)"
-                      >See branches</v-btn
+                      >Show branches</v-btn
                     >
                   </v-card-text>
                 </v-flex>
-              </v-layout>
-              <div
-                v-if="repo.name === repository.name && showBranches"
-                transition="slide-y-transition"
-              >
-                <p
-                  v-for="branch in repository.branches"
-                  :key="`${branch.name}`"
+                <v-flex
+                  v-if="repo.name === repository.name && showBranches"
+                  transition="slide-y-transition"
+                  xs8
+                  offset-xs4
+                  sm9
+                  offset-sm3
                 >
-                  {{ branch.name }}
-                </p>
-              </div>
+                  <v-card-text>
+                    <p
+                      v-for="branch in repository.branches"
+                      :key="`${branch.name}`"
+                    >
+                      {{ branch.name }}
+                    </p>
+                  </v-card-text>
+                </v-flex>
+              </v-layout>
             </v-container>
           </v-card>
         </v-flex>
       </v-layout>
-      <v-btn v-if="repositories.length > 24" v-on:click="handlePageIncrease"
-        ><span>></span></v-btn
-      >
+      <v-container>
+        <v-layout>
+          <v-flex row justify-space-around xs12 sm8 offset-sm2 align-center>
+            <v-btn
+              v-if="page >= 2"
+              v-on:click="handlePageDecrease"
+              color="primary"
+              >Previous</v-btn
+            >
+            <v-btn
+              v-if="checkRepositories()"
+              v-on:click="handlePageIncrease"
+              color="primary"
+              >Next</v-btn
+            >
+          </v-flex>
+        </v-layout>
+      </v-container>
     </v-container>
   </v-container>
 </template>
@@ -78,12 +106,16 @@ export default Vue.extend({
       name: '',
       branches: []
     },
-    showBranches: false
+    showBranches: false,
+    error: false
   }),
   methods: {
     async fetchRepositories() {
       try {
-        if (!this.query) return
+        if (!this.query) {
+          this.page = 1
+          return
+        }
         const response = await axios.get(
           `${this.baseUrl}/users/${this.query}/repos?type=owner&per_page=25&page=${this.page}`,
           { headers: { Accept: 'application/vnd.github.v3+json' } }
@@ -91,6 +123,7 @@ export default Vue.extend({
         this.repositories = response.data
       } catch (err) {
         console.log(err)
+        this.error = true
       }
     },
     async fetchBranches(name: string) {
@@ -110,6 +143,18 @@ export default Vue.extend({
       if (this.repositories.length === 0) return
       this.page++
       this.fetchRepositories()
+    },
+    handlePageDecrease() {
+      if (this.page > 1) {
+        this.page--
+        this.fetchRepositories()
+      }
+    },
+    displayDate(date: string) {
+      return new Date(date).toLocaleDateString()
+    },
+    checkRepositories() {
+      return this.repositories.length > 24
     }
   }
 })
